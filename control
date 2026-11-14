@@ -1,8 +1,8 @@
 Package: com.mj.gpsjoystick
-Name: GPS Joystick Map Prototype
-Version: 0.2.0
+Name: GPS Joystick Continuous Movement + App Location Test
+Version: 0.3.0
 Architecture: iphoneos-arm64
-Description: Independent experimental rootless GPS joystick with MapKit search, explicit confirm and restore. Apple Maps scoped test only.
+Description: Independent experimental rootless GPS joystick with MapKit search, explicit confirm and restore. Includes common-mode joystick updates and experimental third-party CoreLocation callbacks.
 Maintainer: GPS Joystick Local
 Author: Independent prototype
 Section: Tweaks
