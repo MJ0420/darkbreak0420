@@ -35,11 +35,26 @@ int main(void) {
     assert(m.axis_east==0 && m.axis_north==0);
     gps_model_step(&m,0.2);
     assert(m.latitude==2.0 && m.longitude==100.0);
+    // Sustained movement from the last confirmed point (20 frames, 0.15s each).
+    assert(gps_model_teleport(&m,3.156590,101.717790));
+    gps_model_set_speed(&m,18.0);
+    gps_model_set_joystick(&m,0,1);
+    double startLat=m.latitude;
+    for (int frame=0;frame<20;frame++) gps_model_step(&m,.15);
+    double traveled_m=(m.latitude-startLat)*111195.0;
+    assert(traveled_m > 13.5 && traveled_m < 16.5); // 18 km/h * 3s = 15m
+    assert(gps_model_teleport(&m,2.0,101.0));
+    assert(m.axis_north==0 && m.axis_east==0);
+    gps_model_step(&m,0.15);
+    assert(m.latitude==2.0 && m.longitude==101.0);
+    gps_model_set_joystick(&m,1,0);
+    gps_model_step(&m,.2);
+    assert(m.longitude>101.0 && m.latitude==2.0);
     gps_model_restore(&m);
     assert(!m.active && gps_model_encode(&m)==0);
     gps_model_decode(&other,0);
     assert(!other.active);
     assert(!gps_valid_coordinate(NAN,0));
-    puts("PASS: 15 assertions/groups - draft/confirm/movement/pause/teleport/restore/encoding");
+    puts("PASS: expanded model tests - draft/confirm/movement/pause/teleport/restore/encoding");
     return 0;
 }

@@ -149,7 +149,9 @@ static UILabel *MJLabel(NSString *txt, CGRect frame, CGFloat size) {
     [_bubble addGestureRecognizer:drag];
     [self createPanel];
     _lastTick = [NSDate timeIntervalSinceReferenceDate];
-    _movementTimer = [NSTimer scheduledTimerWithTimeInterval:.15 target:self selector:@selector(tick:) userInfo:nil repeats:YES];
+    // Common modes keep motion ticking while the joystick pan gesture is tracked.
+    _movementTimer = [NSTimer timerWithTimeInterval:0.15 target:self selector:@selector(tick:) userInfo:nil repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:_movementTimer forMode:NSRunLoopCommonModes];
 }
 - (void)dragBubble:(UIPanGestureRecognizer *)drag {
     CGPoint pos = [drag translationInView:_root.view];
@@ -253,6 +255,7 @@ static UILabel *MJLabel(NSString *txt, CGRect frame, CGFloat size) {
     NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
     NSTimeInterval dt = now - _lastTick;
     _lastTick = now;
+    if (dt <= 0) return;
     if (!_state.active || (_state.axis_east == 0 && _state.axis_north == 0)) return;
     gps_model_step(&_state,dt);
     MJGPSWrite(&_state);
