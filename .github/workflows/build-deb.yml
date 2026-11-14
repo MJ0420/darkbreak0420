@@ -1,0 +1,59 @@
+name: Build GPS Joystick Rootless DEB
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  ios-rootless:
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Check location model (host tests)
+        run: bash tests/run_tests.sh
+
+      - name: Install iOS build tools (cloud runner only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          brew install ldid dpkg
+          git clone --depth 1 --recurse-submodules https://github.com/theos/theos.git "$HOME/theos"
+          echo "THEOS=$HOME/theos" >> "$GITHUB_ENV"
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-path
+
+      - name: Compile and package Rootless tweak
+        shell: bash
+        run: |
+          set -euo pipefail
+          export THEOS="$HOME/theos"
+          make clean
+          make package THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1
+
+      - name: Validate DEB (no phone testing)
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          debs=(packages/*.deb)
+          if (( ${#debs[@]} == 0 )); then
+            echo 'No .deb produced' >&2
+            exit 1
+          fi
+          for deb in "${debs[@]}"; do
+            dpkg-deb --info "$deb"
+            dpkg-deb --contents "$deb" | tee /tmp/gpsjoystick_contents.txt
+            grep -q 'GPSJoystick.dylib' /tmp/gpsjoystick_contents.txt
+            grep -q 'GPSJoystick.plist' /tmp/gpsjoystick_contents.txt
+          done
+
+      - name: Upload installable package as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GPSJoystick-rootless-deb
+          path: packages/*.deb
+          if-no-files-found: error
