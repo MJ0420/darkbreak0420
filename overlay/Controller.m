@@ -350,7 +350,7 @@ static UILabel *MJLabel(NSString *txt, CGRect frame, CGFloat size) {
 }
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     (void)tableView;
-    if (indexPath.row >= _results.count) return;
+    if (indexPath.row < 0 || (NSUInteger)indexPath.row >= _results.count) return;
     MKLocalSearchCompletion *completion=_results[indexPath.row];
     _search.text=completion.title;
     _resultsTable.hidden=YES;
