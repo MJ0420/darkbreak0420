@@ -1,0 +1,6 @@
+GPS Joystick Rootless beta 0.2
+- Linux clang C model tests: run_tests.sh
+- iOS build: NOT BUILT (Theos + Apple iPhoneOS SDK missing in this environment)
+- iPhone 7 Plus physical testing: NOT PERFORMED
+- Scope of injection: SpringBoard overlay + Apple Maps CoreLocation getter prototype only
+- Bundle contains: independent source and tests. No proprietary GPS Master binaries.
